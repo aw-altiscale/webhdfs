@@ -239,7 +239,10 @@ int webhdfs_chmod (webhdfs_t *fs, const char *path, int permission) {
     yajl_val node, v;
 
     webhdfs_req_open(&req, fs, path);
-    webhdfs_req_set_args(&req, "op=SETPERMISSION&permission=%o", permission);
+
+    // the permission must be in radix-8 format and it's maximal value is 777
+    int short_permission = permission % (8 * 8 * 8);
+    webhdfs_req_set_args(&req, "op=SETPERMISSION&permission=%o", short_permission);
     webhdfs_req_exec(&req, WEBHDFS_REQ_PUT);
     node = webhdfs_req_json_response(&req);
     webhdfs_req_close(&req);

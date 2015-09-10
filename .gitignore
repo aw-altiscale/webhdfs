@@ -1,7 +1,7 @@
 CMakeFiles/**
 CMakeCache.txt
 Makefile
-cmake_insatll.cmake
+cmake_install.cmake
 include/**
 lib/**
 webhdfs/CMakeFiles/**

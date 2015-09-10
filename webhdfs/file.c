@@ -122,7 +122,17 @@ int webhdfs_file_append_buffer (webhdfs_file_t *file,
     data.buffer = (const char *)buffer;
     data.offset = 0;
     data.nbytes = nbytes;
-    return(webhdfs_file_append(file, __append_buffer_upload, &data));
+    int succ;
+    int written_bytes;
+
+    succ = webhdfs_file_append(file, __append_buffer_upload, &data);
+
+    if (succ == 0) {
+        written_bytes = nbytes - data.nbytes;
+        return written_bytes;
+    }
+    else
+      return succ;
 }
 
 size_t webhdfs_file_pread (webhdfs_file_t *file,

@@ -223,6 +223,23 @@ static int webhdfs_fuse_chown (const char *path, uid_t uid, gid_t gid) {
     return(ret);
 }
 
+static int webhdfs_fuse_utime (const char *path, struct utimbuf *time) {
+    return 0;
+}
+
+static int webhdfs_fuse_utimens (const char *path,
+                                 const struct timespec tv[2]) {
+  return 0;
+}
+
+static int webhdfs_fuse_truncate (const char *path, off_t offset) {
+  return 0;
+}
+
+static int webhdfs_fuse_ftruncate (const char *path, off_t offset, struct fuse_file_info * finfo) {
+  return 0;
+}
+
 /* ============================================================================
  * Namespace related functions
  */
@@ -381,10 +398,14 @@ static struct fuse_operations webhdfs_fuse_ops = {
     .getattr        = webhdfs_fuse_getattr,
     .chmod          = webhdfs_fuse_chmod,
     .chown          = webhdfs_fuse_chown,
+    .utime          = webhdfs_fuse_utime,
+    .utimens        = webhdfs_fuse_utimens,
 
     /* Namespace */
     .create         = webhdfs_fuse_create,
     .open           = webhdfs_fuse_open,
+    .truncate       = webhdfs_fuse_truncate,
+    .ftruncate      = webhdfs_fuse_ftruncate,
     .release        = webhdfs_fuse_close,
     .mkdir          = webhdfs_fuse_mkdir,
     .rmdir          = webhdfs_fuse_rmdir,

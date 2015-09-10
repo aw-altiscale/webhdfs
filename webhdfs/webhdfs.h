@@ -133,6 +133,19 @@ int                    webhdfs_set_times          (webhdfs_t *fs,
 
 char *                 webhdfs_home_dir           (webhdfs_t *fs);
 
+int                    webhdfs_create_snapshot    (webhdfs_t *fs,
+                                                   const char *path,
+                                                   const char *name);
+
+int                    webhdfs_delete_snapshot    (webhdfs_t *fs,
+                                                   const char *path,
+                                                   const char *name);
+
+int                    webhdfs_rename_snapshot    (webhdfs_t *fs,
+                                                   const char *path,
+                                                   const char *oldname,
+                                                   const char *newname);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* __cplusplus */

@@ -1,9 +1,17 @@
+cmake_minimum_required(VERSION 2.6)
+
 set(PUBLIC_HEADERS webhdfs.h)
 set(PRIVATE_HEADERS webhdfs_p.h buffer.h)
-set(SOURCES webhdfs.c file.c dir.c buffer.c request.c response.c config.c)
+set(SOURCES webhdfs.c file.c dir.c buffer.c request.c response.c config.c snapshot.c)
 
 find_library(CURL curl)
 find_library(YAJL yajl)
+find_package(GLOG)
+if (GLOG_FOUND)
+  include_directories(${GLOG_INCLUDE_DIRS})
+  set(LIBS ${LIBS} ${GLOG_LIBRARIES})
+  set(CFLAGS -DGLOG)
+endif (GLOG_FOUND)
 
 set(libDir ${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST_NAME}/lib)
 set(incDir ${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST_NAME}/include/webhdfs)

@@ -5,4 +5,5 @@ Dependencies
  - fuse - http://fuse.sourceforge.net/
  - curl - http://curl.haxx.se/
  - yajl - http://lloyd.github.com/yajl/
+ - glog - https://github.com/google/glog (Optional)
 

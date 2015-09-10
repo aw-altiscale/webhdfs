@@ -26,7 +26,9 @@
 #include "webhdfs_p.h"
 #include "webhdfs.h"
 
+#ifdef GLOG
 #include <glog/logging.h>
+#endif
 
 static size_t __webhdfs_req_write (void *ptr,
                                    size_t size,
@@ -119,7 +121,11 @@ int webhdfs_req_exec (webhdfs_req_t *req, int type) {
         return(1);
 
     curl_easy_setopt(curl, CURLOPT_URL, req->buffer.blob);
+#ifdef GLOG
     DLOG(INFO) << "downloading url: " << req->buffer.blob;
+#elif DEBUG
+    printf("downloading url: %s\n", req->buffer.blob);
+#endif
     buffer_clear(&(req->buffer));
 
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
@@ -151,8 +157,11 @@ int webhdfs_req_exec (webhdfs_req_t *req, int type) {
             fprintf(stderr, "%s\n", curl_easy_strerror(err));
 
         curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &url);
+#ifdef GLOG
         DLOG(INFO) << "downloading url: " << url;
-
+#elif DEBUG
+    printf("downloading url: %s\n",url);
+#endif
         curl_easy_setopt(curl, CURLOPT_URL, url);
 
         headers = curl_slist_append(headers, "Transfer-Encoding: chunked");

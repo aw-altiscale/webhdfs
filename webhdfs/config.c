@@ -40,11 +40,11 @@ webhdfs_conf_t *webhdfs_conf_alloc (void) {
 }
 
 void webhdfs_conf_free (webhdfs_conf_t *conf) {
-    if (conf->hdfs_host != NULL)
-        free(conf->hdfs_host);
+    if (conf->host != NULL)
+        free(conf->host);
 
-    if (conf->hdfs_user != NULL)
-        free(conf->hdfs_user);
+    if (conf->user != NULL)
+        free(conf->user);
 
     if (conf->token != NULL)
         free(conf->token);
@@ -96,10 +96,9 @@ webhdfs_conf_t *webhdfs_conf_load (const char *filename) {
     const char *jsonUseSsl[] = {"use-ssl", NULL};
     const char *jsonToken[] = {"token", NULL};
     const char *jsonDoAs[] = {"doas", NULL};
-    const char *jsonUser[] = {"hdfsUser", NULL};
-    const char *jsonHost[] = {"hdfsHost", NULL};
-    const char *jsonPort[] = {"webhdfsPort", NULL};
-    const char *jsonHdfsPort[] = {"hdfsPort", NULL};
+    const char *jsonUser[] = {"user", NULL};
+    const char *jsonHost[] = {"host", NULL};
+    const char *jsonPort[] = {"port", NULL};
     webhdfs_conf_t *conf;
     char buffer[1024];
     yajl_val node, v;
@@ -128,22 +127,19 @@ webhdfs_conf_t *webhdfs_conf_load (const char *filename) {
         conf->token = strdup(YAJL_GET_STRING(v));
 
     if ((v = yajl_tree_get(node, jsonHost, yajl_t_string)) != NULL)
-        conf->hdfs_host = strdup(YAJL_GET_STRING(v));
+        conf->host = strdup(YAJL_GET_STRING(v));
 
     if ((v = yajl_tree_get(node, jsonDoAs, yajl_t_string)) != NULL)
         conf->doas = strdup(YAJL_GET_STRING(v));
 
     if ((v = yajl_tree_get(node, jsonUser, yajl_t_string)) != NULL)
-        conf->hdfs_user = strdup(YAJL_GET_STRING(v));
+        conf->user = strdup(YAJL_GET_STRING(v));
 
     if ((v = yajl_tree_get(node, jsonUseSsl, yajl_t_number)) != NULL)
         conf->use_ssl = YAJL_IS_TRUE(v);
 
     if ((v = yajl_tree_get(node, jsonPort, yajl_t_number)) != NULL)
-        conf->webhdfs_port = YAJL_GET_INTEGER(v);
-
-    if ((v = yajl_tree_get(node, jsonHdfsPort, yajl_t_number)) != NULL)
-        conf->hdfs_port = YAJL_GET_INTEGER(v);
+        conf->port = YAJL_GET_INTEGER(v);
 
     yajl_tree_free(node);
     return(conf);
@@ -154,13 +150,13 @@ int webhdfs_conf_set_server (webhdfs_conf_t *conf,
                              int port,
                              int use_ssl)
 {
-    if (conf->hdfs_host != NULL)
-        free(conf->hdfs_host);
+    if (conf->host != NULL)
+        free(conf->host);
 
-    if ((conf->hdfs_host = strdup(host)) == NULL)
+    if ((conf->host = strdup(host)) == NULL)
         return(1);
 
-    conf->webhdfs_port = port;
+    conf->port = port;
     conf->use_ssl = use_ssl;
 
     return(0);
@@ -169,10 +165,10 @@ int webhdfs_conf_set_server (webhdfs_conf_t *conf,
 int webhdfs_conf_set_user (webhdfs_conf_t *conf,
                            const char *user)
 {
-    if (conf->hdfs_user != NULL)
-        free(conf->hdfs_user);
+    if (conf->user != NULL)
+        free(conf->user);
 
-    if ((conf->hdfs_user = strdup(user)) == NULL)
+    if ((conf->user = strdup(user)) == NULL)
         return(1);
 
     return(0);
@@ -188,50 +184,4 @@ int webhdfs_conf_set_token (webhdfs_conf_t *conf,
         return(1);
 
     return(0);
-}
-
-webhdfs_conf_t *webhdfs_conf_defaults ()
-{
-    webhdfs_conf_t *conf;
-    struct passwd *pw = getpwuid(getuid());
-    char *hostname=malloc(HOST_NAME_MAX);
-
-    if ((conf = webhdfs_conf_alloc()) == NULL) {
-        perror("webhdfs conf object");
-        return(NULL);
-    }
-
-    conf->hdfs_host = strdup("YAJL_GET_STRING(v)");
-
-    conf->hdfs_user = strdup(pw->pw_name);
-
-    conf->webhdfs_port = 50070;
-
-    conf->hdfs_port = 9000;
-
-    return(conf);
-}
-
-webhdfs_conf_t *webhdfs_easy_bootstrap(void)
-{
-    struct passwd *pw = getpwuid(getuid());
-    char *configdir = pw->pw_dir;
-    char *filename=malloc(256);
-
-    snprintf(filename,255,"%s/.webhdfsrc.json",configdir);
-
-    if (access(filename,F_OK) == -1) {
-        configdir=getenv("HADOOP_CONFIG_DIR");
-        snprintf(filename,255,"%s/webhdfs.json",configdir);
-        if (access(filename,F_OK) == -1) {
-            configdir=getenv("HADOOP_PREFIX");
-            snprintf(filename,255,"%s/webhdfs.json",configdir);
-            if (access(filename,F_OK) == -1) {
-                return(webhdfs_conf_defaults(void))
-            }
-        }
-    }
-
-    /* Setup webhdfs config */
-    return(webhdfs_conf_load(filename));
 }

@@ -73,11 +73,11 @@ int webhdfs_req_open (webhdfs_req_t *req,
     buffer_clear(&(req->buffer));
     r = buffer_append_format(&(req->buffer), "%s://%s:%d/webhdfs/v1/%s?",
                              conf->use_ssl ? "https" : "http",
-                             conf->hdfs_host, conf->webhdfs_port,
+                             conf->host, conf->port,
                              (path != NULL) ? path + 1 : "");
 
-    if (conf->hdfs_user != NULL)
-        r |= buffer_append_format(&(req->buffer), "user.name=%s&", conf->hdfs_user);
+    if (conf->user != NULL)
+        r |= buffer_append_format(&(req->buffer), "user.name=%s&", conf->user);
 
     if (conf->token != NULL)
         r |= buffer_append_format(&(req->buffer), "delegation=%s&", conf->token);

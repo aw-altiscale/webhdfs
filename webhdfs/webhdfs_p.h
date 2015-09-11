@@ -35,11 +35,10 @@ struct webhdfs {
 struct webhdfs_conf {
     char *token;            /* delegation token */
     char *doas;             /* proxy user */
-    char *hdfs_user;             /* hdfs user */
-    char *hdfs_host;
+    char *user;             /* hdfs user */
+    char *host;
     int   use_ssl;
-    int   webhdfs_port;
-    int   hdfs_port;
+    int   port;
 };
 
 struct webhdfs_req {

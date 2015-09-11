@@ -52,7 +52,7 @@ __FBSDID("$FreeBSD$");
 #include <string.h>
 #include <sysexits.h>
 #include <unistd.h>
-#include <webhdfs/webhdfs.h>
+#include <webhdfs/posix-proxy.h>
 
 static int	build(char *, mode_t);
 static void	usage(void);
@@ -100,7 +100,7 @@ main(int argc, char *argv[])
 		free(set);
 	}
 
-    conf=webhdfs_easy_bootstrap();
+    webhdfs_easy_bootstrap();
 
 	for (exitval = 0; *argv != NULL; ++argv) {
 		if (pflag) {

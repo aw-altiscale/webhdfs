@@ -1,9 +1,8 @@
-CMakeFiles/**
+**/CMakeFiles
 CMakeCache.txt
-Makefile
-cmake_insatll.cmake
+**/Makefile
+**/cmake_install.cmake
 include/**
 lib/**
-webhdfs/CMakeFiles/**
-webhdfs/cmake_install.cmake
-**.swp
+bin/**
+**/**.swp

@@ -62,8 +62,6 @@ int                     webhdfs_conf_set_user     (webhdfs_conf_t *conf,
 int                     webhdfs_conf_set_token    (webhdfs_conf_t *conf,
                                                    const char *token);
 
-webhdfs_conf_t *        webhdfs_easy_bootstrap    (void);
-
 /* WebHDFS File-System */
 webhdfs_t *             webhdfs_connect           (const webhdfs_conf_t *conf);
 void                    webhdfs_disconnect        (webhdfs_t *fs);

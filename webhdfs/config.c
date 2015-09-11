@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <pwd.h>
 
 #include <yajl/yajl_tree.h>
 #include <curl/curl.h>
@@ -91,8 +92,7 @@ static char *__load_file (const char *filename) {
     return(blob);
 }
 
-webhdfs_conf_t *webhdfs_conf_load (const char *filename,
-                                   char **error) {
+webhdfs_conf_t *webhdfs_conf_load (const char *filename) {
     const char *jsonUseSsl[] = {"use-ssl", NULL};
     const char *jsonToken[] = {"token", NULL};
     const char *jsonDoAs[] = {"doas", NULL};
@@ -129,65 +129,21 @@ webhdfs_conf_t *webhdfs_conf_load (const char *filename,
 
     if ((v = yajl_tree_get(node, jsonHost, yajl_t_string)) != NULL)
         conf->hdfs_host = strdup(YAJL_GET_STRING(v));
-    else {
-        *error = (char *)malloc(512);
-        if (*error == NULL) {
-            return(NULL);
-        }
-        snprintf(*error, 512,
-                 "Error parsing hdfsHost parameter. "
-                 "Check hdfsConfigurationFile (%s) "
-                 "and make sure hdfsHost is present and it's of string type.", filename);
-        return(NULL);
-    }
 
     if ((v = yajl_tree_get(node, jsonDoAs, yajl_t_string)) != NULL)
         conf->doas = strdup(YAJL_GET_STRING(v));
 
     if ((v = yajl_tree_get(node, jsonUser, yajl_t_string)) != NULL)
         conf->hdfs_user = strdup(YAJL_GET_STRING(v));
-    else {
-        *error = (char *)malloc(512);
-        if (*error == NULL) {
-            return(NULL);
-        }
-        snprintf(*error, 512,
-                 "Error parsing hdfsUser parameter. "
-                 "Check hdfsConfigurationFile (%s) "
-                 "and make sure hdfsUser is present and it's of string type.", filename);
-        return(NULL);
-    }
 
     if ((v = yajl_tree_get(node, jsonUseSsl, yajl_t_number)) != NULL)
         conf->use_ssl = YAJL_IS_TRUE(v);
 
     if ((v = yajl_tree_get(node, jsonPort, yajl_t_number)) != NULL)
         conf->webhdfs_port = YAJL_GET_INTEGER(v);
-    else {
-        *error = (char *)malloc(512);
-        if (*error == NULL) {
-            return(NULL);
-        }
-        snprintf(*error, 512,
-                 "Error parsing webhdfsPort parameter. "
-                 "Check hdfsConfigurationFile (%s) "
-                 "and make sure webhdfsPort is present and it's of integer type.", filename);
-        return(NULL);
-    }
 
     if ((v = yajl_tree_get(node, jsonHdfsPort, yajl_t_number)) != NULL)
         conf->hdfs_port = YAJL_GET_INTEGER(v);
-    else {
-        *error = (char *)malloc(512);
-        if (*error == NULL) {
-            return(NULL);
-        }
-        snprintf(*error, 512,
-                 "Error parsing hdfsPort parameter. "
-                 "Check hdfsConfigurationFile (%s) "
-                 "and make sure hdfsPort is present and it's of integer type.", filename);
-        return(NULL);
-    }
 
     yajl_tree_free(node);
     return(conf);
@@ -234,3 +190,48 @@ int webhdfs_conf_set_token (webhdfs_conf_t *conf,
     return(0);
 }
 
+webhdfs_conf_t *webhdfs_conf_defaults ()
+{
+    webhdfs_conf_t *conf;
+    struct passwd *pw = getpwuid(getuid());
+    char *hostname=malloc(HOST_NAME_MAX);
+
+    if ((conf = webhdfs_conf_alloc()) == NULL) {
+        perror("webhdfs conf object");
+        return(NULL);
+    }
+
+    conf->hdfs_host = strdup("YAJL_GET_STRING(v)");
+
+    conf->hdfs_user = strdup(pw->pw_name);
+
+    conf->webhdfs_port = 50070;
+
+    conf->hdfs_port = 9000;
+
+    return(conf);
+}
+
+webhdfs_conf_t *webhdfs_easy_bootstrap(void)
+{
+    struct passwd *pw = getpwuid(getuid());
+    char *configdir = pw->pw_dir;
+    char *filename=malloc(256);
+
+    snprintf(filename,255,"%s/.webhdfsrc.json",configdir);
+
+    if (access(filename,F_OK) == -1) {
+        configdir=getenv("HADOOP_CONFIG_DIR");
+        snprintf(filename,255,"%s/webhdfs.json",configdir);
+        if (access(filename,F_OK) == -1) {
+            configdir=getenv("HADOOP_PREFIX");
+            snprintf(filename,255,"%s/webhdfs.json",configdir);
+            if (access(filename,F_OK) == -1) {
+                return(webhdfs_conf_defaults(void))
+            }
+        }
+    }
+
+    /* Setup webhdfs config */
+    return(webhdfs_conf_load(filename));
+}

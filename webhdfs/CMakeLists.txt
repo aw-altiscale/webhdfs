@@ -10,7 +10,7 @@ find_package(GLOG)
 if (GLOG_FOUND)
   include_directories(${GLOG_INCLUDE_DIRS})
   set(LIBS ${LIBS} ${GLOG_LIBRARIES})
-  set(CFLAGS -DGLOG)
+  set(CMAKE_CFLAGS ${CMAKE_CFLAGS} -DGLOG)
 endif (GLOG_FOUND)
 
 set(libDir ${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST_NAME}/lib)

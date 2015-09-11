@@ -50,8 +50,7 @@ typedef struct webhdfs_fstat {
 
 /* WebHDFS Configuration - host:port, user, token, ... */
 webhdfs_conf_t *        webhdfs_conf_alloc        (void);
-webhdfs_conf_t *        webhdfs_conf_load         (const char *filename,
-                                                   char **error);
+webhdfs_conf_t *        webhdfs_conf_load         (const char *filename);
 void                    webhdfs_conf_free         (webhdfs_conf_t *conf);
 
 int                     webhdfs_conf_set_server   (webhdfs_conf_t *conf,
@@ -62,6 +61,8 @@ int                     webhdfs_conf_set_user     (webhdfs_conf_t *conf,
                                                    const char *user);
 int                     webhdfs_conf_set_token    (webhdfs_conf_t *conf,
                                                    const char *token);
+
+webhdfs_conf_t *        webhdfs_easy_bootstrap    (void);
 
 /* WebHDFS File-System */
 webhdfs_t *             webhdfs_connect           (const webhdfs_conf_t *conf);

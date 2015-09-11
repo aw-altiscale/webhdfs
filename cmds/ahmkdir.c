@@ -52,6 +52,7 @@ __FBSDID("$FreeBSD$");
 #include <string.h>
 #include <sysexits.h>
 #include <unistd.h>
+#include <webhdfs/webhdfs.h>
 
 static int	build(char *, mode_t);
 static void	usage(void);
@@ -65,6 +66,7 @@ main(int argc, char *argv[])
 	mode_t omode;
 	void *set = NULL;
 	char *mode;
+    webhdfs_conf_t *conf;
 
 	omode = pflag = 0;
 	mode = NULL;
@@ -97,6 +99,8 @@ main(int argc, char *argv[])
 		omode = getmode(set, S_IRWXU | S_IRWXG | S_IRWXO);
 		free(set);
 	}
+
+    conf=webhdfs_easy_bootstrap();
 
 	for (exitval = 0; *argv != NULL; ++argv) {
 		if (pflag) {

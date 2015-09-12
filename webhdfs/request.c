@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define DEBUG 1
 
 #include <curl/curl.h>
 #include <yajl/yajl_tree.h>
@@ -74,7 +75,7 @@ int webhdfs_req_open (webhdfs_req_t *req,
     r = buffer_append_format(&(req->buffer), "%s://%s:%d/webhdfs/v1/%s?",
                              conf->use_ssl ? "https" : "http",
                              conf->host, conf->port,
-                             (path != NULL) ? path + 1 : "");
+                             (path != NULL) ? path : "");
 
     if (conf->user != NULL)
         r |= buffer_append_format(&(req->buffer), "user.name=%s&", conf->user);

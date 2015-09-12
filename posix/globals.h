@@ -16,22 +16,5 @@
  * limitations under the License.
  */
 
-#ifndef _WEBHDFS_GLOBALS_H_
-#define _WEBHDFS_GLOBALS_H_
 
-#include <stdlib.h>
-#include <stdarg.h>
-#include "webhdfs_p.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-webhdfs_conf_t *POSIX_PROXY_CONF;
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif /* __cplusplus */
-
-#endif /* _WEBHDFS_POSIX_H_ */
 

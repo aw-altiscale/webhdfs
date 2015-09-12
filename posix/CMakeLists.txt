@@ -1,23 +1,28 @@
 cmake_minimum_required(VERSION 2.6)
 
 set(PUBLIC_HEADERS posix.h)
-set(PRIVATE_HEADERS webhdfs_p.h buffer.h)
-set(SOURCES bootstrap.c)
+set(PRIVATE_HEADERS globals.h)
+set(SOURCES posix.c)
 
 set(libDir ${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST_NAME}/lib)
 set(incDir ${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST_NAME}/include/webhdfs)
-file(MAKE_DIRECTORY ${libDir})
-file(MAKE_DIRECTORY ${incDir})
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/../webhdfs)
+include_directories(${incDir})
+link_directories(${libDir})
 
 set(LIBRARY_OUTPUT_PATH ${libDir})
 
 add_library(webhdfsposix_s STATIC ${SOURCES} ${PUBLIC_HEADERS} ${PRIVATE_HEADERS})
 add_library(webhdfsposix SHARED ${SOURCES} ${PUBLIC_HEADERS} ${PRIVATE_HEADERS})
 
+set(WEBHDFSPOSIX_VERSION_MAJOR 0)
+set(WEBHDFSPOSIX_VERSION_MINOR 0)
+set(WEBHDFSPOSIX_VERSION_PATCH 1)
+set(WEBHDFSPOSIX_VERSION_STRING ${WEBHDFSPOSIX_VERSION_MAJOR}.${WEBHDFSPOSIX_VERSION_MINOR}.${WEBHDFSPOSIX_VERSION_PATCH})
+set_target_properties(webhdfsposix PROPERTIES VERSION ${WEBHDFSPOSIX_VERSION_STRING}
+                                          SOVERSION ${WEBHDFSPOSIX_VERSION_MAJOR})
 target_link_libraries(webhdfsposix webhdfs)
-target_link_libraries(webhdfsposix_s webhdfs_s)
+target_link_libraries(webhdfsposix_s webhds_s)
 
 # copy public headers to output directory
 foreach(header ${PUBLIC_HEADERS})

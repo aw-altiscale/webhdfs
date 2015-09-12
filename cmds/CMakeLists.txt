@@ -6,4 +6,4 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST_NAME}/include)
 link_directories(${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST_NAME}/lib)
 
 add_executable(ahmkdir ahmkdir.c)
-target_link_libraries(ahmkdir webhdfs)
+target_link_libraries(ahmkdir webhdfsposix)

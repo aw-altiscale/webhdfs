@@ -185,3 +185,52 @@ int webhdfs_conf_set_token (webhdfs_conf_t *conf,
 
     return(0);
 }
+
+webhdfs_conf_t *webhdfs_conf_defaults ()
+{
+    webhdfs_conf_t *conf;
+    struct passwd *pw = getpwuid(getuid());
+    int maxhostsize=sysconf(_SC_HOST_NAME_MAX);
+    char *hostname=malloc(maxhostsize);
+
+    if ((conf = webhdfs_conf_alloc()) == NULL) {
+        perror("webhdfs conf object");
+        return(NULL);
+    }
+
+    gethostname(hostname,maxhostsize);
+
+    conf->host = strdup(hostname);
+
+    conf->user = strdup(pw->pw_name);
+
+    conf->port = 50070;
+
+    return(conf);
+}
+
+webhdfs_conf_t *webhdfs_easy_bootstrap()
+{
+    struct passwd *pw = getpwuid(getuid());
+    char *configdir = pw->pw_dir;
+    char *filename=malloc(256);
+    webhdfs_conf_t *conf;
+
+    snprintf(filename,255,"%s/.webhdfsrc.json",configdir);
+
+    if (access(filename,F_OK) == -1) {
+        configdir=getenv("HADOOP_CONFIG_DIR");
+        snprintf(filename,255,"%s/webhdfs.json",configdir);
+        if (access(filename,F_OK) == -1) {
+            configdir=getenv("HADOOP_PREFIX");
+            snprintf(filename,255,"%s/webhdfs.json",configdir);
+            if (access(filename,F_OK) == -1) {
+                return(webhdfs_conf_defaults());
+            }
+        }
+    }
+
+    /* Setup webhdfs config */
+    conf=webhdfs_conf_load(filename);
+    return(conf);
+}

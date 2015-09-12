@@ -16,20 +16,4 @@
  * limitations under the License.
  */
 
-#ifndef _WEBHDFS_POSIX_H_
-#define _WEBHDFS_POSIX_H_
-
-#include <stdlib.h>
-#include <stdarg.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-webhdfs_conf_t *        webhdfs_easy_bootstrap    (void);
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif /* __cplusplus */
-
-#endif /* _WEBHDFS_POSIX_H_ */
+ int        webhdfs_posix_bootstrap    (void);

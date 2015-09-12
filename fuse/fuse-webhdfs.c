@@ -17,10 +17,11 @@
  */
 
 #define _FILE_OFFSET_BITS   64
-#define FUSE_USE_VERSION    28
+#define FUSE_USE_VERSION    26
 #include <fuse.h>
 
 #include <webhdfs/webhdfs.h>
+#include <webhdfs/compat.h>
 
 #include <sys/types.h>
 #include <execinfo.h>
@@ -50,94 +51,6 @@ static struct webhdfs_fuse __webhdfs_fuse;
 
 #define __WEBHDFS                   (__webhdfs_fuse.webhdfs)
 
-#define __ceil_div(a, b)            (((a) + (b) - 1) / (b))
-
-/* ============================================================================
- *  user/group utils
- */
-#define GROUP_SIZE_MAX      (1024)      /* sysconf(_SC_GETGR_R_SIZE_MAX) */
-#define USER_SIZE_MAX       (1024)      /* sysconf(_SC_GETPW_R_SIZE_MAX) */
-
-static int __hdfs_user_uid (const char *name, uid_t *uid) {
-    char buffer[USER_SIZE_MAX];
-    struct passwd *tmp;
-    struct passwd pwd;
-
-    if (getpwnam_r(name, &pwd, buffer, USER_SIZE_MAX, &tmp))
-        return(1);
-
-    *uid = pwd.pw_uid;
-    return(0);
-}
-
-static char *__hdfs_user_name (uid_t uid) {
-    char buffer[USER_SIZE_MAX];
-    struct passwd *tmp;
-    struct passwd pwd;
-
-    if (getpwuid_r(uid, &pwd, buffer, USER_SIZE_MAX, &tmp))
-        return(NULL);
-
-    return(pwd.pw_name ? strdup(pwd.pw_name) : NULL);
-}
-
-static int __hdfs_group_gid (const char *name, gid_t *gid) {
-    char buffer[GROUP_SIZE_MAX];
-    struct group *tmp;
-    struct group grp;
-
-    if (getgrnam_r(name, &grp, buffer, GROUP_SIZE_MAX, &tmp))
-        return(1);
-
-    *gid = grp.gr_gid;
-    return(0);
-}
-
-static char *__hdfs_group_name (gid_t gid) {
-    char buffer[GROUP_SIZE_MAX];
-    struct group *tmp;
-    struct group grp;
-
-    if (getgrgid_r(gid, &grp, buffer, GROUP_SIZE_MAX, &tmp))
-        return(NULL);
-
-    return(grp.gr_name ? strdup(grp.gr_name) : NULL);
-}
-
-/* ============================================================================
- *  stat/utils utils
- */
-#define HDFS_DEFAULT_GID            99
-#define HDFS_DEFAULT_UID            99
-
-#define __hdfs_is_dir(stat)         (!strcmp((stat)->type, "DIRECTORY"))
-#define __hdfs_is_file(stat)        (!strcmp((stat)->type, "FILE"))
-
-static void __hdfs_stat (const webhdfs_fstat_t *hdfs_stat, struct stat *stat) {
-    memset(stat, 0, sizeof(struct stat));
-
-    if (__hdfs_user_uid(hdfs_stat->owner, &(stat->st_uid)))
-        stat->st_uid = HDFS_DEFAULT_UID;
-    if (__hdfs_group_gid(hdfs_stat->group, &(stat->st_gid)))
-        stat->st_gid = HDFS_DEFAULT_GID;
-
-    if (__hdfs_is_dir(hdfs_stat)) {
-        stat->st_mode    = S_IFDIR | hdfs_stat->permission;
-        stat->st_nlink   = 2;
-        stat->st_size    = 4096;
-        stat->st_blksize = 4096;
-    } else /* if (__hdfs_is_file(hdfs_stat)) */ {
-        stat->st_mode    = S_IFREG | hdfs_stat->permission;
-        stat->st_nlink   = 1;
-        stat->st_size    = hdfs_stat->length;
-        stat->st_blksize = hdfs_stat->block;
-    }
-
-    stat->st_blocks  = __ceil_div(stat->st_size, stat->st_blksize);
-    stat->st_atime   = hdfs_stat->atime;
-    stat->st_mtime   = hdfs_stat->mtime;
-    stat->st_ctime   = hdfs_stat->mtime;
-}
 
 /* ============================================================================
  *  webhdfs Fuse
@@ -161,66 +74,21 @@ static void webhdfs_fuse_disconnect (void) {
     fclose(__webhdfs_fuse.flog);
 }
 
-/* ============================================================================
- * Metadata related functions
- */
 static int webhdfs_fuse_statfs (const char *path, struct statvfs *stat) {
-    if (0) {
-        stat->f_bsize   = 0x0000;       /* file system block size */
-        stat->f_frsize  = 0x0000;       /* fragment size */
-        stat->f_blocks  = 0x0000;       /* size of fs in f_frsize units */
-        stat->f_bfree   = 0x0000;       /* # free blocks */
-        stat->f_bavail  = 0x0000;       /* # free blocks for unprivileged users */
-        stat->f_files   = 0x0000;       /* # inodes */
-        stat->f_ffree   = 0x0000;       /* # free inodes */
-        stat->f_favail  = 0x0000;       /* # free inodes for unprivileged users */
-        stat->f_fsid    = 0x0000;       /* file system ID */
-        stat->f_flag    = 0x0000;       /* mount flags */
-        stat->f_namemax = 0x0000;       /* maximum filename length */
-    }
-
-    return(-1);
+    return(webhdfs_compat_statfs(__WEBHDFS,path,stat));
 }
 
+
 static int webhdfs_fuse_getattr (const char *path, struct stat *stat) {
-    webhdfs_fstat_t *hdfs_stat;
-
-    if ((hdfs_stat = webhdfs_stat(__WEBHDFS, path)) != NULL) {
-        __hdfs_stat(hdfs_stat, stat);
-        webhdfs_fstat_free(hdfs_stat);
-        return(0);
-    }
-
-    return(-ENOENT);
+    return(webhdfs_compat_stat(__WEBHDFS,path,stat));
 }
 
 static int webhdfs_fuse_chmod (const char *path, mode_t mode) {
-    if (webhdfs_chmod(__WEBHDFS, path, mode))
-        return(-ENOENT);
-    return(0);
+    return(webhdfs_compat_chmod(__WEBHDFS, path, mode));
 }
 
 static int webhdfs_fuse_chown (const char *path, uid_t uid, gid_t gid) {
-    char *group;
-    char *user;
-    int ret;
-
-    if ((user = __hdfs_user_name(uid)) == NULL) {
-        return(-EIO);
-    }
-
-    if ((group = __hdfs_group_name(gid)) == NULL) {
-        free(user);
-        return(-EIO);
-    }
-
-    ret = 0;
-    if (webhdfs_chown(__WEBHDFS, path, user, group))
-        ret = -EIO;
-
-    free(group);
-    free(user);
-    return(ret);
+    return(webhdfs_compat_chown(__WEBHDFS,path,uid,gid));
 }
 
 static int webhdfs_fuse_utime (const char *path, struct utimbuf *time) {
@@ -279,15 +147,11 @@ static int webhdfs_fuse_close (const char *path, struct fuse_file_info *ffi) {
 }
 
 static int webhdfs_fuse_mkdir (const char *path, mode_t mode) {
-    if (webhdfs_mkdir(__WEBHDFS, path, mode))
-        return(-EIO);
-    return(0);
+    return(webhdfs_compat_mkdir(__WEBHDFS,path,mode));
 }
 
 static int webhdfs_fuse_rmdir (const char *path) {
-    if (webhdfs_rmdir(__WEBHDFS, path, 1))
-        return(-EIO);
-    return(0);
+    return(webhdfs_compat_rmdir(__WEBHDFS,path));
 }
 
 static int webhdfs_fuse_unlink (const char *path) {
@@ -297,9 +161,7 @@ static int webhdfs_fuse_unlink (const char *path) {
 }
 
 static int webhdfs_fuse_rename (const char *path, const char *newpath) {
-    if (webhdfs_rename(__WEBHDFS, path, newpath))
-        return(-EIO);
-    return(0);
+    return(webhdfs_compat_rename(__WEBHDFS,path,newpath));
 }
 
 static int webhdfs_fuse_link (const char *path, const char *newpath) {
@@ -420,7 +282,6 @@ static struct fuse_operations webhdfs_fuse_ops = {
     .write          = webhdfs_fuse_write,
     .fsync          = webhdfs_fuse_fsync,
     .readdir        = webhdfs_fuse_readdir,
-    .ioctl          = NULL,
     .lock           = NULL,
 };
 

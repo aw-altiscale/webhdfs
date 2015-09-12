@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 
-set(PUBLIC_HEADERS webhdfs.h)
+set(PUBLIC_HEADERS webhdfs.h compat.h)
 set(PRIVATE_HEADERS webhdfs_p.h buffer.h)
-set(SOURCES webhdfs.c file.c dir.c buffer.c request.c response.c config.c snapshot.c)
+set(SOURCES webhdfs.c file.c dir.c buffer.c request.c response.c config.c snapshot.c compat.c)
 
 find_library(CURL curl)
 find_library(YAJL yajl)
@@ -22,6 +22,13 @@ set(LIBRARY_OUTPUT_PATH ${libDir})
 
 add_library(webhdfs_s STATIC ${SOURCES} ${PUBLIC_HEADERS} ${PRIVATE_HEADERS})
 add_library(webhdfs SHARED ${SOURCES} ${PUBLIC_HEADERS} ${PRIVATE_HEADERS})
+
+set(WEBHDFS_VERSION_MAJOR 0)
+set(WEBHDFS_VERSION_MINOR 0)
+set(WEBHDFS_VERSION_PATCH 1)
+set(WEBHDFS_VERSION_STRING ${WEBHDFS_VERSION_MAJOR}.${WEBHDFS_VERSION_MINOR}.${WEBHDFS_VERSION_PATCH})
+set_target_properties(webhdfs PROPERTIES VERSION ${WEBHDFS_VERSION_STRING}
+                                          SOVERSION ${WEBHDFS_VERSION_MAJOR})
 
 target_link_libraries(webhdfs ${CURL} ${YAJL})
 target_link_libraries(webhdfs_s ${CURL} ${YAJL})

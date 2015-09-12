@@ -6,3 +6,7 @@ include/**
 lib/**
 bin/**
 **/**.swp
+examples/example-basic
+examples/example-basic2
+examples/example-read
+examples/example-write

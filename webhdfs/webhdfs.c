@@ -42,9 +42,7 @@ void webhdfs_disconnect (webhdfs_t *fs) {
     free(fs);
 }
 
-webhdfs_fstat_t *webhdfs_stat (webhdfs_t *fs,
-                               const char *path,
-                               char **error) {
+webhdfs_fstat_t *webhdfs_stat (webhdfs_t *fs, const char *path) {
     const char *pathSuffix[] = {"pathSuffix", NULL};
     const char *replication[] = {"replication", NULL};
     const char *permission[] = {"permission", NULL};
@@ -66,13 +64,6 @@ webhdfs_fstat_t *webhdfs_stat (webhdfs_t *fs,
     webhdfs_req_close(&req);
 
     if ((v = webhdfs_response_exception(root)) != NULL) {
-//        const char *exceptionNode[] = {"exception", NULL};
-//        yajl_val exception = yajl_tree_get(v, exceptionNode , yajl_t_string);
-//        YAJL_GET_STRING(exception);
-        const char *messageNode[] = {"message", NULL};
-        yajl_val message = yajl_tree_get(v, messageNode, yajl_t_string);
-        *error = __strdup(YAJL_GET_STRING(message));
-
         yajl_tree_free(root);
         return(NULL);
     }

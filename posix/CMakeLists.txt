@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 2.6)
 
 set(PUBLIC_HEADERS posix.h)
 set(PRIVATE_HEADERS globals.h)
-set(SOURCES posix.c)
+set(SOURCES posix.c realpath.c)
 
 set(libDir ${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST_NAME}/lib)
-set(incDir ${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST_NAME}/include/webhdfs)
+set(incDir ${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST_NAME}/include)
 
 include_directories(${incDir})
 link_directories(${libDir})
@@ -28,10 +28,10 @@ target_link_libraries(webhdfsposix_s webhds_s)
 foreach(header ${PUBLIC_HEADERS})
   set (header ${CMAKE_CURRENT_SOURCE_DIR}/${header})
 
-  exec_program(${CMAKE_COMMAND} ARGS -E copy_if_different ${header} ${incDir})
+  exec_program(${CMAKE_COMMAND} ARGS -E copy_if_different ${header} ${incDir}/webhdfs)
 
   add_custom_command(TARGET webhdfsposix_s POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${header} ${incDir})
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${header} ${incDir}/webhdfs)
 endforeach(header ${PUBLIC_HEADERS})
 
 if(NOT WIN32)

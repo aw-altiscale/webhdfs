@@ -18,6 +18,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #define DEBUG 1
 
@@ -62,7 +63,9 @@ int webhdfs_req_open (webhdfs_req_t *req,
                       const char *path)
 {
     const webhdfs_conf_t *conf = fs->conf;
-    int r;
+    char *newpath=NULL;
+    char *homepath=NULL;
+    int r,mysize;
 
     buffer_open(&(req->buffer));
 
@@ -70,12 +73,28 @@ int webhdfs_req_open (webhdfs_req_t *req,
     req->upload_data = NULL;
     req->upload = NULL;
 
+    if (path != NULL) {
+        if (path[0]!='/') {
+            /* this should really be cached to speed things up */
+            homepath=webhdfs_home_dir(fs);
+            if (homepath !=NULL) {
+                mysize=sizeof(homepath)+sizeof(path)+2;
+                newpath=malloc(mysize);
+                snprintf(newpath,mysize,"%s/%s",homepath,path);
+            } else {
+                newpath=strdup(path);
+            }
+        } else {
+            newpath=strdup(path);
+        }
+    }
+
     /* Fill URL */
     buffer_clear(&(req->buffer));
     r = buffer_append_format(&(req->buffer), "%s://%s:%d/webhdfs/v1/%s?",
                              conf->use_ssl ? "https" : "http",
                              conf->host, conf->port,
-                             (path != NULL) ? path : "");
+                             (newpath != NULL) ? newpath + 1 : "");
 
     if (conf->user != NULL)
         r |= buffer_append_format(&(req->buffer), "user.name=%s&", conf->user);
@@ -83,6 +102,7 @@ int webhdfs_req_open (webhdfs_req_t *req,
     if (conf->token != NULL)
         r |= buffer_append_format(&(req->buffer), "delegation=%s&", conf->token);
 
+    free(newpath);
     return(r);
 }
 

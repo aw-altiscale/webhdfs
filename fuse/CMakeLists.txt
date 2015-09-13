@@ -8,12 +8,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST
 
 find_package(FUSE REQUIRED)
 
+include_directories(${FUSE_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST_NAME}/include)
+link_directories(${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST_NAME}/lib)
+
 set(binDir ${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST_NAME}/bin)
 file(MAKE_DIRECTORY ${binDir})
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST_NAME}/include)
-include_directories(${FUSE_INCLUDE_DIRS})
-link_directories(${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST_NAME}/lib)
 
 add_executable(fuse-webhdfs ${SOURCES})
 target_link_libraries(fuse-webhdfs webhdfs ${FUSE})

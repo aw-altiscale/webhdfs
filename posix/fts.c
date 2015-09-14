@@ -54,8 +54,6 @@ __RCSID("$NetBSD: fts.c,v 1.48 2015/01/29 15:55:21 manu Exp $");
 #include <string.h>
 #include <unistd.h>
 
-
-
 #if ! HAVE_NBTOOL_CONFIG_H
 #define	HAVE_STRUCT_DIRENT_D_NAMLEN
 #endif
@@ -128,6 +126,8 @@ fts_open(char * const *argv, int options,
 	size_t len;
 
 	_DIAGASSERT(argv != NULL);
+
+    printf("Here!\n");
 
 	/* Options check. */
 	if (options & ~FTS_OPTIONMASK) {
@@ -341,6 +341,8 @@ fts_read(FTS *sp)
 	int instr;
 	char *t;
 	int saved_errno;
+
+    printf("inside my fts_read");
 
 	_DIAGASSERT(sp != NULL);
 
@@ -831,6 +833,8 @@ mem1:				saved_errno = errno;
 
 		if (cderrno) {
 			if (nlinks) {
+                printf("fts_error here?2\n");
+
 				p->fts_info = FTS_NS;
 				p->fts_errno = cderrno;
 			} else
@@ -951,6 +955,7 @@ fts_stat(FTS *sp, FTSENT *p, int follow)
 	 * a stat(2).  If that fails, check for a non-existent symlink.  If
 	 * fail, set the errno from the stat call.
 	 */
+    printf("fts_error here1?\n");
 	if (ISSET(FTS_LOGICAL) || follow) {
 		if (stat(p->fts_accpath, sbp)) {
 			saved_errno = errno;
@@ -962,10 +967,14 @@ fts_stat(FTS *sp, FTSENT *p, int follow)
 			goto err;
 		}
 	} else if (lstat(p->fts_accpath, sbp)) {
+        printf("fts_error here3?\n");
+
 		p->fts_errno = errno;
 err:		memset(sbp, 0, sizeof(*sbp));
 		return (FTS_NS);
 	}
+
+    printf("past err\n");
 
 	if (S_ISDIR(sbp->st_mode)) {
 		/*

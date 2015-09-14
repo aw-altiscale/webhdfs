@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 
-set(PUBLIC_HEADERS posix.h)
-set(PRIVATE_HEADERS globals.h fts.h)
+set(PUBLIC_HEADERS posix.h fts.h)
+set(PRIVATE_HEADERS globals.h)
 set(SOURCES posix.c realpath.c fileio.c fts.c)
 
 set(libDir ${CMAKE_CURRENT_BINARY_DIR}/../${WEBHDFS_DIST_NAME}/lib)

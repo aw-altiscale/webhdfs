@@ -51,7 +51,6 @@
 #include <grp.h>
 #include <util.h>
 
-
 #include "ls.h"
 #include "extern.h"
 

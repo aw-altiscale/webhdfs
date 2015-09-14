@@ -48,7 +48,6 @@ __FBSDID("$FreeBSD$");
 #include <err.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <fts.h>
 #include <grp.h>
 #include <locale.h>
 #include <pwd.h>
@@ -58,6 +57,9 @@ __FBSDID("$FreeBSD$");
 #include <string.h>
 #include <sysexits.h>
 #include <unistd.h>
+
+#include "webhdfs/posix.h"
+#include "webhdfs/fts.h"
 
 static int dflag, eval, fflag, iflag, Pflag, vflag, Wflag, stdin_ok;
 static int rflag, Iflag, xflag;
@@ -86,6 +88,8 @@ main(int argc, char *argv[])
 {
 	int ch;
 	char *p;
+
+	webhdfs_posix_bootstrap();
 
 	(void)setlocale(LC_ALL, "");
 
@@ -185,6 +189,8 @@ rm_tree(char **argv)
 	int flags;
 	int rval;
 
+
+    printf("rmtree\n");
 	/*
 	 * Remove a file hierarchy.  If forcing removal (-f), or interactive
 	 * (-i) or can't ask anyway (stdin_ok), don't stat the file.
@@ -204,14 +210,24 @@ rm_tree(char **argv)
 		flags |= FTS_WHITEOUT;
 	if (xflag)
 		flags |= FTS_XDEV;
+
+    printf ("rnning fts_open\n");
+
 	if (!(fts = fts_open(argv, flags, NULL))) {
-		if (fflag && errno == ENOENT)
+		if (fflag && errno == ENOENT) {
+            printf("flagging ENOENT\n");
 			return;
+        }
+        printf ("failed fts_open\n");
+
 		err(1, "fts_open");
 	}
+    printf ("checking fts_read\n");
 	while ((p = fts_read(fts)) != NULL) {
+        printf("insdie fts_read\n");
 		switch (p->fts_info) {
 		case FTS_DNR:
+        printf("fts_dnr\n");
 			if (!fflag || p->fts_errno != ENOENT) {
 				warnx("%s: %s",
 				    p->fts_path, strerror(p->fts_errno));
@@ -219,8 +235,10 @@ rm_tree(char **argv)
 			}
 			continue;
 		case FTS_ERR:
+        printf("fts_err\n");
 			errx(1, "%s: %s", p->fts_path, strerror(p->fts_errno));
 		case FTS_NS:
+        printf("fts_ns\n");
 			/*
 			 * Assume that since fts_read() couldn't stat the
 			 * file, it can't be unlinked.
@@ -234,6 +252,7 @@ rm_tree(char **argv)
 			}
 			continue;
 		case FTS_D:
+        printf("fts_d\n");
 			/* Pre-order: give user chance to skip. */
 			if (!fflag && !check(p->fts_path, p->fts_accpath,
 			    p->fts_statp)) {
@@ -248,16 +267,19 @@ rm_tree(char **argv)
 				goto err;
 			continue;
 		case FTS_DP:
+        printf("fts_dp\n");
 			/* Post-order: see if user skipped. */
 			if (p->fts_number == SKIPPED)
 				continue;
 			break;
 		default:
+        printf("default\n");
 			if (!fflag &&
 			    !check(p->fts_path, p->fts_accpath, p->fts_statp))
 				continue;
 		}
 
+        printf("lchflags!\n");
 		rval = 0;
 		if (!uid &&
 		    (p->fts_statp->st_flags & (UF_APPEND|UF_IMMUTABLE)) &&

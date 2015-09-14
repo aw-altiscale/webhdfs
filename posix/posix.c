@@ -74,6 +74,12 @@ char *getcwd(char *buf, size_t len)
     return buf;
 }
 
+int lstat(const char *path, struct stat *stat) {
+    char npath[MAXPATHLEN];
+    realpath(path,npath);
+    return(webhdfs_compat_stat(__WEBHDFS_POSIX,npath,stat));
+}
+
 int mkdir(const char *path, mode_t mode)
 {
     char npath[MAXPATHLEN];

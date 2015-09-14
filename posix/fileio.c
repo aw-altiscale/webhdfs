@@ -48,13 +48,14 @@ int open(const char *path, int flags, ...)
     }
 
     /* we bascially ignore mode */
-
+    printf("calling file open\n");
     if ((file = webhdfs_file_open(__WEBHDFS_POSIX, path)) == NULL)
         return(-EIO);
 
     realloc(__POSIX_FD,(__POSIX_FD_CNT+1)*sizeof(webhdfs_file_t));
     __POSIX_FD[__POSIX_FD_CNT]=file;
 
+    printf("fd: %u\n",__POSIX_FD_CNT);
     return (__POSIX_FD_CNT);
 }
 

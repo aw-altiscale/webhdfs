@@ -138,14 +138,12 @@ typedef struct _ftsent {
 #include <sys/cdefs.h>
 
 __BEGIN_DECLS
-#ifndef	__LIBC12_SOURCE__
 FTSENT	*fts_children(FTS *, int);
 int	 fts_close(FTS *);
 FTS	*fts_open(char * const *, int,
     int (*)(const FTSENT **, const FTSENT **));
 FTSENT	*fts_read(FTS *);
 int	 fts_set(FTS *, FTSENT *, int);
-#endif
 __END_DECLS
 
 #endif /* !_FTS_H_ */

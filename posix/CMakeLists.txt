@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
 
-include(CheckFunctionExists)
-
 set(PUBLIC_HEADERS posix.h)
 set(PRIVATE_HEADERS globals.h fts.h)
 set(SOURCES posix.c realpath.c fileio.c fts.c)

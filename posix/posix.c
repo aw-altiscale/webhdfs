@@ -40,21 +40,21 @@ int webhdfs_posix_bootstrap()
     return(0);
 }
 
-int chmod (const char *path, mode_t mode)
+int chmod(const char *path, mode_t mode)
 {
     char npath[MAXPATHLEN];
     realpath(path,npath);
     return(webhdfs_compat_chmod(__WEBHDFS_POSIX,npath,mode));
 }
 
-int chown (const char *path, uid_t uid, gid_t gid)
+int chown(const char *path, uid_t uid, gid_t gid)
 {
     char npath[MAXPATHLEN];
     realpath(path,npath);
     return(webhdfs_compat_chown(__WEBHDFS_POSIX,npath,uid,gid));
 }
 
-char *getcwd (char *buf, size_t len)
+char *getcwd(char *buf, size_t len)
 {
     char ourbuf[MAXPATHLEN];
 
@@ -95,13 +95,13 @@ int rmdir(const char *path)
     return(webhdfs_compat_rmdir(__WEBHDFS_POSIX,npath));
 }
 
-int stat (const char *path, struct stat *stat) {
+int stat(const char *path, struct stat *stat) {
     char npath[MAXPATHLEN];
     realpath(path,npath);
     return(webhdfs_compat_stat(__WEBHDFS_POSIX,npath,stat));
 }
 
-int statfs (webhdfs_t *fs, const char *path, struct statvfs *stat) {
+int statfs (const char *path, struct statvfs *stat) {
     char npath[MAXPATHLEN];
     realpath(path,npath);
     return(webhdfs_compat_statfs(__WEBHDFS_POSIX,npath,stat));

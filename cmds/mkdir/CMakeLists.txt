@@ -5,5 +5,5 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../${WEBHDFS_D
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/../../${WEBHDFS_DIST_NAME}/include)
 link_directories(${CMAKE_CURRENT_BINARY_DIR}/../../${WEBHDFS_DIST_NAME}/lib)
 
-add_executable(ahmkdir ahmkdir.c)
+add_executable(ahmkdir mkdir.c)
 target_link_libraries(ahmkdir webhdfsposix)

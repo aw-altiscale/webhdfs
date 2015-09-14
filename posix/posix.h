@@ -16,4 +16,5 @@
  * limitations under the License.
  */
 
- int        webhdfs_posix_bootstrap    (void);
+int        webhdfs_posix_bootstrap    (void);
+

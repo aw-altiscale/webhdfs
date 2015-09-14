@@ -78,7 +78,6 @@ static int webhdfs_fuse_statfs (const char *path, struct statvfs *stat) {
     return(webhdfs_compat_statfs(__WEBHDFS,path,stat));
 }
 
-
 static int webhdfs_fuse_getattr (const char *path, struct stat *stat) {
     return(webhdfs_compat_stat(__WEBHDFS,path,stat));
 }
